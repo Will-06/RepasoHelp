@@ -168,3 +168,86 @@ class Course extends Model
 
 
 ==============================
+
+
+
+
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\AcademicDegree;
+use Illuminate\Http\Request;
+
+class AcademicDegreeController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = AcademicDegree::query();
+
+        // Filtros
+        if ($request->has('degree_name')) {
+            $query->withName($request->degree_name);
+        }
+
+        // Ordenamiento
+        $sortBy = $request->get('sort_by', 'id');
+        $sortOrder = $request->get('sort_order', 'asc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        // Paginación
+        $perPage = $request->get('per_page', 10);
+        $degrees = $query->paginate($perPage);
+
+        return response()->json($degrees);
+    }
+
+    public function show($id)
+    {
+        $degree = AcademicDegree::findOrFail($id);
+        return response()->json($degree);
+    }
+
+    public function store(Request $request)
+    {
+        // Sin validación
+        $degree = AcademicDegree::create($request->all());
+        return response()->json($degree, 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $degree = AcademicDegree::findOrFail($id);
+        
+        // Sin validación
+        $degree->update($request->all());
+        return response()->json($degree);
+    }
+
+    public function destroy($id)
+    {
+        $degree = AcademicDegree::findOrFail($id);
+        $degree->delete();
+        
+        return response()->json(['message' => 'Academic degree deleted successfully']);
+    }
+}
+
+
+
+
+
+# Obtener todos los recursos (paginados)
+GET /api/resource?page=1&per_page=10
+
+# Filtrar por campo
+GET /api/resource?field=value
+
+# Búsqueda por texto (si la API lo soporta)
+GET /api/resource?search=palabra
+
+# Ordenar resultados
+GET /api/resource?sort_field=nombre&sort_order=asc
+
+# Obtener un recurso por ID
+GET /api/resource/{id}
